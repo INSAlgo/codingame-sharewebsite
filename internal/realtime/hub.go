@@ -15,20 +15,35 @@ type Message struct {
 }
 
 // Hub gère l'ensemble des clients connectés et la diffusion des messages.
+// Il mémorise également le dernier message diffusé pour l'envoyer aux nouveaux clients.
 type Hub struct {
 	mu      sync.RWMutex
 	clients map[*websocket.Conn]struct{}
+
+	lastMsg Message
+	lastSet bool
 }
 
 func NewHub() *Hub {
 	return &Hub{clients: make(map[*websocket.Conn]struct{})}
 }
 
-// Broadcast envoie un message JSON à tous les clients.
+// Broadcast envoie un message JSON à tous les clients et mémorise ce message
+// comme étant le dernier diffusé.
 func (h *Hub) Broadcast(msg Message) {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
+	// Snapshot de la liste des clients et mise à jour du dernier message,
+	// sans faire d'I/O sous verrou.
+	h.mu.Lock()
+	h.lastMsg = msg
+	h.lastSet = true
+
+	clients := make([]*websocket.Conn, 0, len(h.clients))
 	for c := range h.clients {
+		clients = append(clients, c)
+	}
+	h.mu.Unlock()
+
+	for _, c := range clients {
 		if err := c.WriteJSON(msg); err != nil {
 			log.Printf("write error to %s: %v", c.RemoteAddr(), err)
 		}
@@ -97,6 +112,23 @@ func (h *Hub) Handler(allowedOrigins []string) http.HandlerFunc {
 		}
 		h.add(conn)
 		log.Printf("Client connecté: %s", conn.RemoteAddr())
+
+		// À la connexion, envoyer le dernier message s'il existe
+		var (
+			hasLast bool
+			last    Message
+		)
+		h.mu.RLock()
+		hasLast = h.lastSet
+		if hasLast {
+			last = h.lastMsg
+		}
+		h.mu.RUnlock()
+		if hasLast {
+			if err := conn.WriteJSON(last); err != nil {
+				log.Printf("erreur envoi dernier message à %s: %v", conn.RemoteAddr(), err)
+			}
+		}
 
 		go func(c *websocket.Conn) {
 			// Lire jusqu'à fermeture pour détecter déconnexion

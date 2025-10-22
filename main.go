@@ -18,7 +18,7 @@ import (
 	"ws-codingame-insalgo/internal/realtime"
 )
 
-// TODO: Envoie du lien quand un client se connecte ; Déploiement du site ; Lien avec le bot discord pour pouvoir maj depuis le discord
+// TODO: Déploiement du site ; Lien avec le bot discord pour pouvoir maj depuis le discord
 
 // securityHeaders ajoute des en-têtes de sécurité standard.
 func securityHeaders(next http.Handler) http.Handler {
