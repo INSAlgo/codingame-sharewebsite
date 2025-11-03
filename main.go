@@ -3,8 +3,11 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/subtle"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -57,6 +60,59 @@ func allowedHostsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func broadcastHandler(hub *realtime.Hub, apiKey string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+			return
+		}
+		if strings.TrimSpace(apiKey) == "" {
+			http.Error(w, "API non configurée", http.StatusInternalServerError)
+			return
+		}
+		key := r.Header.Get("X-Api-Key")
+		if key == "" {
+			auth := r.Header.Get("Authorization")
+			const prefix = "Bearer "
+			if strings.HasPrefix(auth, prefix) {
+				key = strings.TrimSpace(auth[len(prefix):])
+			}
+		}
+		if subtle.ConstantTimeCompare([]byte(key), []byte(apiKey)) != 1 {
+			http.Error(w, "Non autorisé", http.StatusUnauthorized)
+			return
+		}
+
+		var payload struct {
+			Content string `json:"content"`
+		}
+		ct := r.Header.Get("Content-Type")
+		if strings.Contains(ct, "application/json") {
+			if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+				http.Error(w, "JSON invalide", http.StatusBadRequest)
+				return
+			}
+		} else {
+			b, err := io.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, "Lecture corps requête échouée", http.StatusBadRequest)
+				return
+			}
+			payload.Content = string(b)
+		}
+		_ = r.Body.Close()
+
+		content := strings.TrimSpace(payload.Content)
+		if content == "" {
+			http.Error(w, "content vide", http.StatusBadRequest)
+			return
+		}
+
+		hub.Broadcast(realtime.Message{Content: content})
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
 func main() {
 	// Hub WebSocket
 	hub := realtime.NewHub()
@@ -72,8 +128,11 @@ func main() {
 		}
 	}
 
+	apiKey := strings.TrimSpace(os.Getenv("BROADCAST_API_KEY"))
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", hub.Handler(allowedOrigins))
+	mux.HandleFunc("/api/broadcast", broadcastHandler(hub, apiKey))
 	mux.Handle("/", http.FileServer(http.Dir("static")))
 
 	// Wrap middlewares

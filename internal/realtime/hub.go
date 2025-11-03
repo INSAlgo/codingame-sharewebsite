@@ -92,8 +92,15 @@ func (h *Hub) Handler(allowedOrigins []string) http.HandlerFunc {
 			if len(norm) == 0 {
 				// Autoriser même origine uniquement
 				// Construire l'URL d'origine attendue depuis la requête
+				// Déterminer le schéma effectif derrière un reverse-proxy (Nginx) via X-Forwarded-Proto
 				scheme := "http"
-				if r.TLS != nil {
+				if xf := r.Header.Get("X-Forwarded-Proto"); xf != "" {
+					// Utiliser la première valeur si plusieurs sont présentes
+					parts := strings.Split(strings.ToLower(xf), ",")
+					if len(parts) > 0 && strings.TrimSpace(parts[0]) != "" {
+						scheme = strings.TrimSpace(parts[0])
+					}
+				} else if r.TLS != nil {
 					scheme = "https"
 				}
 				expected := scheme + "://" + r.Host

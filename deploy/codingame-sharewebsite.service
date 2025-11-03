@@ -1,0 +1,51 @@
+# codingame-sharewebsite.service
+# Systemd unit to run the Go app behind Nginx (HTTP on :8080)
+#
+# Manual fields to fill before enabling:
+# - User/Group: set to a non-root user that owns the app files (e.g., "app")
+# - WorkingDirectory: set to the directory that contains "server" and the "static" folder (default: /opt/codingame-sharewebsite)
+# - ExecStart: path to your built binary (default: /opt/codingame-sharewebsite/server)
+# - Environment:
+#     ALLOWED_HOSTS: set to your subdomain host (without scheme), e.g., codingame-share.insalgo.fr
+#     ALLOWED_ORIGINS: set to your HTTPS origin (with scheme), e.g., https://codingame-share.insalgo.fr
+#     BROADCAST_API_KEY: optional; set if you implement the /api/broadcast endpoint
+
+[Unit]
+Description=Codingame Share Website (HTTP behind Nginx)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+# TODO: change these to the user and group that will run the service
+User=app
+Group=app
+
+# TODO: ensure this directory exists and contains the built binary and the "static" folder
+WorkingDirectory=/opt/codingame-sharewebsite
+
+# TODO: ensure the binary path is correct
+ExecStart=/opt/codingame-sharewebsite/server
+
+# Restarts
+Restart=on-failure
+RestartSec=3
+
+# Environment configuration (adjust to your domain)
+# IMPORTANT: Behind Nginx with HTTPS, set ALLOWED_ORIGINS to your https:// subdomain
+Environment=ALLOWED_HOSTS=codingame-share.insalgo.fr
+Environment=ALLOWED_ORIGINS=https://codingame-share.insalgo.fr
+# Optional, only if you add the /api/broadcast endpoint for a Discord bot:
+# Environment=BROADCAST_API_KEY=change_me
+
+# Security hardening (adjust if your app needs write access elsewhere)
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
