@@ -1,17 +1,41 @@
 <!doctype html>
 <html lang="fr">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>WS Live Update</title>
-		<link rel="stylesheet" href="/css/style.css" />
-	</head>
-	<body>
-		<main class="container">
-			<h1>Message en temps réel</h1>
-			<p id="live-text">En attente de message...</p>
-			<div class="status" id="status">Déconnecté</div>
-		</main>
-		<script src="/js/client.js"></script>
-	</body>
-	</html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>INSAlgo Codingame</title>
+        <link rel="stylesheet" href="/css/style.css" />
+        <link rel="icon" type="image/x-icon" href="/assets/ico/favicon.ico" />
+    </head>
+
+    <body>
+        <main class="container bento-grid bento-2x2">
+            <section class="card logo-card area-logo">
+                <div class="logo" aria-label="Logo">
+                    <img
+                        src="/assets/svg/logo.svg"
+                        alt="Logo"
+                        width="128"
+                        height="128"
+                    />
+                </div>
+            </section>
+
+            <section class="card title-card area-title">
+                <h1>INSAlgo Codingame</h1>
+                <p>Mises à jour en temps réel</p>
+            </section>
+
+            <section class="card message-card area-status">
+                <h2>Messages en temps réel</h2>
+                <p id="live-text" class="live-box">En attente de message...</p>
+            </section>
+
+            <section class="card status-card area-message">
+                <h2>Statut de connexion</h2>
+                <div class="status" id="status">Déconnecté</div>
+            </section>
+        </main>
+        <script src="/js/client.js"></script>
+    </body>
+</html>
