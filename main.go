@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"crypto/subtle"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -139,17 +137,17 @@ func main() {
 	handler := securityHeaders(allowedHostsMiddleware(mux))
 
 	// Lecture du terminal et diffusion
-	go func() {
-		scanner := bufio.NewScanner(os.Stdin)
-		fmt.Println("Tapez vos messages ci-dessous et appuyez sur Entrée pour les envoyer aux clients...")
-		for scanner.Scan() {
-			line := scanner.Text()
-			hub.Broadcast(realtime.Message{Content: line})
-		}
-		if err := scanner.Err(); err != nil {
-			log.Printf("Erreur de lecture depuis le terminal: %v", err)
-		}
-	}()
+	// go func() {
+	// 	scanner := bufio.NewScanner(os.Stdin)
+	// 	fmt.Println("Tapez vos messages ci-dessous et appuyez sur Entrée pour les envoyer aux clients...")
+	// 	for scanner.Scan() {
+	// 		line := scanner.Text()
+	// 		hub.Broadcast(realtime.Message{Content: line})
+	// 	}
+	// 	if err := scanner.Err(); err != nil {
+	// 		log.Printf("Erreur de lecture depuis le terminal: %v", err)
+	// 	}
+	// }()
 
 	// Choisir HTTP ou HTTPS
 	addrHTTP := ":8080"

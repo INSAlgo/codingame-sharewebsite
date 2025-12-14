@@ -1,41 +1,123 @@
 <!doctype html>
 <html lang="fr">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>INSAlgo Codingame</title>
-        <link rel="stylesheet" href="/css/style.css" />
-        <link rel="icon" type="image/x-icon" href="/assets/ico/favicon.ico" />
-    </head>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>INSAlgo Codingame - Link Sharing</title>
+		<link rel="stylesheet" href="css/style.css" />
+		<link rel="icon" type="image/x-icon" href="/assets/ico/favicon.ico" />
+	</head>
+	<body>
+		<div class="container">
+			<!-- Header Section -->
+			<div class="header-section">
+				<div class="header-grid">
+					<!-- Logo Placeholder -->
+					<div class="logo-box">
+						<img
+							src="/assets/svg/logo.svg"
+							alt="Logo"
+							width="128"
+							height="128"
+						/>
+					</div>
 
-    <body>
-        <main class="container bento-grid bento-2x2">
-            <section class="card logo-card area-logo">
-                <div class="logo" aria-label="Logo">
-                    <img
-                        src="/assets/svg/logo.svg"
-                        alt="Logo"
-                        width="128"
-                        height="128"
-                    />
-                </div>
-            </section>
+					<!-- Title Section -->
+					<div class="title-box">
+						<h1>INSAlgo Codingame</h1>
+						<p>Mises à jour en temps réel</p>
+					</div>
+				</div>
+			</div>
 
-            <section class="card title-card area-title">
-                <h1>INSAlgo Codingame</h1>
-                <p>Mises à jour en temps réel</p>
-            </section>
+			<!-- Main Content Grid -->
+			<div class="content-grid">
+				<!-- Messages Section -->
+				<div class="messages-section">
+					<h2>Messages en temps réel</h2>
 
-            <section class="card message-card area-status">
-                <h2>Messages en temps réel</h2>
-                <p id="live-text" class="live-box">En attente de message...</p>
-            </section>
+					<div class="url-input-wrapper">
+						<input
+							type="text"
+							id="urlInput"
+							class="url-input"
+							value="https://www.codingame.com/clashofcode/clash/4372940728f72109625867c747418d4"
+							placeholder="Share your link..."
+						/>
+						<button
+							class="copy-button"
+							id="copyButton"
+							aria-label="Copy link"
+						>
+							<svg
+								id="copyIcon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+								></path>
+							</svg>
+							<svg
+								id="checkIcon"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								style="display: none"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								></path>
+							</svg>
+						</button>
+					</div>
 
-            <section class="card status-card area-message">
-                <h2>Statut de connexion</h2>
-                <div class="status" id="status">Déconnecté</div>
-            </section>
-        </main>
-        <script src="/js/client.js"></script>
-    </body>
+					<div
+						class="copy-success"
+						id="copySuccess"
+						style="display: none"
+					>
+						<svg
+							fill="currentColor"
+							viewBox="0 0 24 24"
+							width="16"
+							height="16"
+						>
+							<path
+								d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+							></path>
+						</svg>
+						<span>Copied to clipboard!</span>
+					</div>
+				</div>
+
+				<!-- Status Bar -->
+				<div class="status-bar">
+					<div class="status-header">STATUT DE<br />CONNEXION</div>
+
+					<div class="status-indicator">
+						<div class="status-dot connected" id="statusDot"></div>
+						<span class="status-text" id="statusText">
+							Connecté
+						</span>
+					</div>
+
+					<button class="connect-button connected" id="connectButton">
+						Connecté
+					</button>
+				</div>
+			</div>
+			<footer class="footer">
+				<p>&copy; 2025 INSAlgo. Tous droits réservés.</p>
+			</footer>
+		</div>
+		<script src="js/client.js"></script>
+	</body>
 </html>
