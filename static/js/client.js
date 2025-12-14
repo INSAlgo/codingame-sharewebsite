@@ -1,40 +1,83 @@
 (() => {
-	const statusEl = document.getElementById('status');
-	const paragraph = document.getElementById('live-text');
+	// =========================================================
+	//  ELEMENTS DU DOM
+	// =========================================================
+	const statusEl = document.getElementById("statusDot");
+	const statusTextEl = document.getElementById("statusText");
+	const connectButton = document.getElementById("connectButton");
+	const urlInput = document.getElementById("urlInput");
+	const copyButton = document.getElementById("copyButton");
+	const copyIcon = document.getElementById("copyIcon");
+	const checkIcon = document.getElementById("checkIcon");
+	const copySuccess = document.getElementById("copySuccess");
 
+	let ws = null;
+	let manuallyDisconnected = false;
+
+	// =========================================================
+	//  COPIE DU LIEN (ancien code de main.js)
+	// =========================================================
+	copyButton.addEventListener("click", () => {
+		const url = urlInput.value.trim();
+		if (!url) return;
+
+		navigator.clipboard.writeText(url).then(() => {
+			// transition icônes
+			copyIcon.style.display = "none";
+			checkIcon.style.display = "block";
+
+			setTimeout(() => {
+				copySuccess.style.display = "none";
+			}, 1500);
+
+			setTimeout(() => {
+				checkIcon.style.display = "none";
+				copyIcon.style.display = "block";
+			}, 2000);
+		});
+	});
+
+	// =========================================================
+	//  STATUS UI
+	// =========================================================
+	function updateStatus(connected) {
+		statusEl.className =
+			"status-dot " + (connected ? "connected" : "disconnected");
+		statusTextEl.textContent = connected ? "Connecté" : "Déconnecté";
+
+		connectButton.className =
+			"connect-button " + (connected ? "connected" : "disconnected");
+		connectButton.textContent = connected ? "Connecté" : "Déconnecté";
+	}
+
+	// =========================================================
+	//  GESTION DE CONNEXION
+	// =========================================================
 	function connect() {
-		const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-		const url = `${proto}://${location.host}/ws`;
-		const ws = new WebSocket(url);
+		ws = new WebSocket("ws://localhost:8080/ws");
 
 		ws.onopen = () => {
-			statusEl.textContent = 'Connecté';
-			statusEl.className = 'status online';
+			updateStatus(true);
+			manuallyDisconnected = false;
 		};
 
-		ws.onmessage = (evt) => {
-			try {
-				const data = JSON.parse(evt.data);
-				if (data && typeof data.content === 'string') {
-					paragraph.textContent = data.content;
-				}
-			} catch (e) {
-				console.error('Message non JSON:', evt.data);
-			}
-		};
-
-		ws.onclose = () => {
-			statusEl.textContent = 'Déconnecté - reconnexion...';
-			statusEl.className = 'status offline';
-			setTimeout(connect, 1000); // tentative de reconnexion simple
+		ws.onmessage = (event) => {
+			console.log("Message reçu :", event.data);
 		};
 
 		ws.onerror = () => {
-			statusEl.textContent = 'Erreur de connexion';
-			statusEl.className = 'status error';
-			ws.close();
+			console.error("WebSocket error");
+		};
+
+		ws.onclose = () => {
+			updateStatus(false);
+
+			if (!manuallyDisconnected) {
+				setTimeout(connect, 1000);
+			}
 		};
 	}
 
+	// Lancer connexion automatique
 	connect();
 })();
